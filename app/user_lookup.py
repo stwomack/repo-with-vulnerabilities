@@ -27,15 +27,16 @@ def bootstrap():
 
 def find_account(account_id):
     connection = _connect()
-    query = "SELECT account_id, holder, balance FROM accounts WHERE account_id = '" + account_id + "'"
-    rows = connection.execute(query).fetchall()
+    query = "SELECT account_id, holder, balance FROM accounts WHERE account_id = ?"
+    rows = connection.execute(query, (account_id,)).fetchall()
     connection.close()
     return [dict(row) for row in rows]
 
 
 def search_accounts_by_holder(holder):
     connection = _connect()
-    query = "SELECT account_id, holder FROM accounts WHERE holder LIKE '%%%s%%'" % holder
-    rows = connection.execute(query).fetchall()
+    query = "SELECT account_id, holder FROM accounts WHERE holder LIKE ? ESCAPE '\\'"
+    pattern = "%" + str(holder).replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%"
+    rows = connection.execute(query, (pattern,)).fetchall()
     connection.close()
     return [dict(row) for row in rows]
